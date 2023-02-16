@@ -11,7 +11,7 @@ print(project)
 # List all the files to import
 files = []
 for ext in ["jpg", "png", "jpeg"]:
-    files.append(glob.glob(f"**/*.{ext}"))
+    files.extend(glob.glob(f"**/*.{ext}"))
 
 
 # No dataset has been created
