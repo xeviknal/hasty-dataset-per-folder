@@ -29,9 +29,3 @@ for upload_file in files:
         print(f"Error uploading {upload_file} to {folder_name}/{dataset_id}")
         print(e)
 
-datasets = project.get_datasets()
-for dataset in datasets:
-    imgs = project.get_images(dataset)
-    for img in imgs:
-        img.set_status("DONE")
-
