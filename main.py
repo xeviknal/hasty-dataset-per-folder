@@ -1,12 +1,12 @@
-from hasty import Client
+from collections import defaultdict
 import glob
 import os
+from hasty import Client
 
 API_KEY = "MEEEEC_API_KEY"
 client = Client(api_key=API_KEY)
 project = client.get_project('projectIDGoESHERE')
 print(project)
-
 
 # List all the files to import
 files = []
@@ -15,24 +15,23 @@ for ext in ["jpg", "png", "jpeg"]:
 
 
 # No dataset has been created
-datasets = []
+datasets = defaultdict()
 for upload_file in files:
+    folder_name = os.path.dirname(upload_file)
+    dataset_id = datasets.get(folder_name)
+    if not dataset_id:
+        dataset_id = project.create_dataset(folder_name)
+        datasets[folder_name] = dataset_id
     print("Uploading:", upload_file)
-    project.upload_from_file(dataset_id, upload_file)
+    try:
+        project.upload_from_file(dataset_id, upload_file)
+    except Exception as e:
+        print(f"Error uploading {upload_file} to {folder_name}/{dataset_id}")
+        print(e)
 
+datasets = project.get_datasets()
+for dataset in datasets:
+    imgs = project.get_images(dataset)
+    for img in imgs:
+        img.set_status("DONE")
 
-for dirs in os.listdir(source_dir):
-    upload_dir = os.path.join(source_dir, dirs)
-    if os.path.isfile(upload_dir):
-        continue
-    else:
-        dataset_name = dirs
-        dataset_id = project.create_dataset(dataset_name)
-        print(dataset_name, "dataset created")
-        for root, dirs, files in os.walk(source_dir):
-            for filename in files:
-                upload_file = os.path.join(root, filename)
-                if upload_file.endswith(".jpg") or upload_file.endswith(".png"):
-                    project.upload_from_file(dataset_id,
-                                   upload_file)
-                    print("Uploading:", upload_file)
